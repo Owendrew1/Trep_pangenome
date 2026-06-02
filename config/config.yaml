@@ -1,6 +1,5 @@
-# Writable scratch on Nepenthes — confirm with lab (ls -la /scratch).
-# /scratch/uottawa.o.univ/odrew060 is NOT valid on this cluster.
-scratch_dir: "/scratch/references/trifolium/Trep_pangenome"
+# Your scratch on Nepenthes (ls /scratch → odrew060/). Not home, not github-repos.
+scratch_dir: "/scratch/odrew060/Trep_pangenome"
 
 # Read-only inputs from the indexing repo.
 index_trep_refs_results_dir: "~/github-repos/index_Trep_refs/results"
