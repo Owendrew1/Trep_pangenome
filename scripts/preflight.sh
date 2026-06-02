@@ -46,19 +46,20 @@ for label, p in paths.items():
     print(f"  {label:10} {p}")
 
 print("\n=== scratch ===")
-if not scratch.exists():
-    print(f"  creating {scratch}")
-    scratch.mkdir(parents=True)
-probe = scratch / ".write_test"
-probe.write_text("ok")
-probe.unlink()
-print(f"  writable: yes")
 try:
+    scratch.mkdir(parents=True, exist_ok=True)
+    probe = scratch / ".write_test"
+    probe.write_text("ok")
+    probe.unlink()
+    print(f"  writable: yes ({scratch})")
     import shutil
     du = shutil.disk_usage(scratch)
     print(f"  free: {du.free // (1024**3)} GB")
-except OSError:
-    pass
+except (OSError, PermissionError) as e:
+    print(f"  ERROR: cannot write to scratch_dir: {scratch}", file=sys.stderr)
+    print("  Find a writable path:  ls -la /scratch", file=sys.stderr)
+    print("  Then set scratch_dir in config/config.yaml", file=sys.stderr)
+    sys.exit(1)
 
 print("\n=== inputs (index_Trep_refs) ===")
 if not ref.is_dir():

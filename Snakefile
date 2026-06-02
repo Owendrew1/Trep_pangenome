@@ -40,7 +40,7 @@ rule make_seqfile:
 
 rule cactus_pangenome:
     input:
-        rules.make_seqfile.output.seqfile,
+        seqfile=rules.make_seqfile.output.seqfile,
     output:
         gbz=f"{PGD}/{NAME}.full.gbz",
         gfa=f"{PGD}/{NAME}.full.gfa.gz",
