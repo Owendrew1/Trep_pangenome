@@ -1,0 +1,15 @@
+# Project conda env for Trep_pangenome (Snakemake driver only).
+# Create once on Nepenthes — do not install these tools server-wide.
+#
+#   conda env create -f environment.yaml
+#   conda activate trep_pangenome
+#
+# Cactus itself is installed per-rule via Snakemake --use-conda (envs/cactus.yaml).
+
+name: trep_pangenome
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - snakemake=9.21
+  - snakemake-executor-plugin-slurm

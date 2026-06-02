@@ -1,0 +1,24 @@
+# All large outputs under scratch_dir (single place to verify).
+scratch_dir: "/scratch/uottawa.o.univ/odrew060/Trep_pangenome"
+
+# Read-only inputs from the indexing repo.
+index_trep_refs_results_dir: "~/github-repos/index_Trep_refs/results"
+
+samples_csv: "samples.csv"
+
+pangenome:
+  out_name: "trifolium_repens"
+  reference: "UTM_haploid"
+
+  use_singularity: false
+  singularity_image: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.3"
+  batch_system: "slurm"
+
+  mg_cores: 48
+  map_cores: 32
+  cons_cores: 48
+  index_cores: 48
+  mem_mb: 128000
+  runtime: 2880
+
+  extra_args: "--filter 2 --giraffe clip filter --gbz clip filter full --gfa clip full --vcf --viz"

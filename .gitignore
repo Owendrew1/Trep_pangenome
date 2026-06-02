@@ -1,0 +1,13 @@
+# Snakemake outputs and Cactus scratch — keep repo small
+work/
+results/
+logs/
+.snakemake/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Local editor / env
+.idea/
+.vscode/
+*.swp
