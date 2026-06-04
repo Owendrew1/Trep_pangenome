@@ -1,10 +1,10 @@
 # Read-only inputs from index_Trep_refs (do not edit that repo from here).
-refs_dir: "/scratch/references/trifolium/repens"
-index_done_flag: "/scratch/odrew060/index_Trep_refs/ref_indexing.done"
+refs_dir: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results"
+index_done_flag: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results/UTM_Trep_v1.0/haploid/ref.done"
 index_samples_csv: "../../index_Trep_refs/resources/samples.csv"
-# Set true if refs_dir is the old repo results/ tree ({source}/{haplotype}/*.fna).
-refs_use_haplotype_subdir: false
+refs_use_haplotype_subdir: true
 
+pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 
 # Pangenome outputs, Cactus jobstore, and scratch (your folder — not the reference tree)
