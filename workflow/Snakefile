@@ -17,7 +17,9 @@ USE_HAP_SUBDIR = config.get("refs_use_haplotype_subdir", False)
 PG = config["pangenome"]
 NAME = PG["out_name"]
 CACTUS_ACTIVATE = PG.get("cactus_activate", "")
-CACTUS_SCRIPT = str(Path(__file__).resolve().parent.parent / "scripts" / "run_cactus_pangenome.sh")
+# Repo root (parent of workflow/). Do not use __file__ — breaks under --directory workflow.
+REPO_ROOT = Path(workflow.basedir).parent
+CACTUS_SCRIPT = str(REPO_ROOT / "scripts" / "run_cactus_pangenome.sh")
 CONTAINER = PG.get("container", "")
 BIND_FLAGS = " ".join(
     f"-B {p}:{p}"
