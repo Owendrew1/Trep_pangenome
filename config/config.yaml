@@ -25,7 +25,16 @@ done_flag: "/scratch/odrew060/Trep_pangenome/pangenome.done"
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-  batch_system: "slurm"
+  # Cactus: pre-built binaries (GitHub). quay.io/docker often blocked on Nepenthes/Mac.
+  cactus_activate: "/scratch/odrew060/Trep_pangenome/cactus-bin-v2.9.3/venv-cactus-v2.9.3/bin/activate"
+  # Fallback if you have a local .sif (not docker:// — quay times out):
+  # container: "/scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.3.sif"
+  container_bind:
+    - /scratch/odrew060
+    - /home/uottawa.o.univ/odrew060
+  # Nepenthes (rap-p*): no sbatch/module — use single_machine (same idea as index_Trep_refs --cores N).
+  # slurm: only if sbatch/squeue exist on the host you launch from.
+  batch_system: "single_machine"
   mg_cores: 48
   map_cores: 32
   cons_cores: 48

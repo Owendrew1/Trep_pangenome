@@ -1,6 +1,6 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
 # Run from repo root:
-#   snakemake -s workflow/Snakefile --directory workflow --cores 4 -p --use-conda
+#   snakemake -s workflow/Snakefile --directory workflow --cores 4 -p
 
 from pathlib import Path
 
@@ -16,6 +16,16 @@ USE_HAP_SUBDIR = config.get("refs_use_haplotype_subdir", False)
 
 PG = config["pangenome"]
 NAME = PG["out_name"]
+CACTUS_ACTIVATE = PG.get("cactus_activate", "")
+CACTUS_SCRIPT = str(Path(__file__).resolve().parent.parent / "scripts" / "run_cactus_pangenome.sh")
+CONTAINER = PG.get("container", "")
+BIND_FLAGS = " ".join(
+    f"-B {p}:{p}"
+    for p in PG.get(
+        "container_bind",
+        ["/scratch/odrew060", "/home/uottawa.o.univ/odrew060"],
+    )
+)
 
 INDEX_BY_ID = {
     r["row_id"]: r
@@ -94,27 +104,36 @@ rule cactus_pangenome:
         min=f"{PGD}/{NAME}.d2.min",
     log:
         f"{LOG}/cactus_pangenome/{NAME}.log",
-    params:
-        jobstore=str(JOBSTORE),
-        work=str(WORK),
-        extra=PG.get("extra_args", ""),
     resources:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),
-    conda:
-        "envs/cactus.yaml",
-    shell:
-        """
-        set -euo pipefail
-        mkdir -p {PGD} $(dirname {log}) {params.work}
+    run:
+        import subprocess
 
-        cactus-pangenome {params.jobstore} {input.seqfile} \
-            --outDir {PGD} --outName {NAME} --reference {PG[reference]} \
-            --batchSystem {PG[batch_system]} --workDir {params.work} --logFile {log} \
-            --mgCores {PG[mg_cores]} --mapCores {PG[map_cores]} \
-            --consCores {PG[cons_cores]} --indexCores {PG[index_cores]} \
-            {params.extra}
-        """
+        PGD.mkdir(parents=True, exist_ok=True)
+        WORK.mkdir(parents=True, exist_ok=True)
+        Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
+        if not Path(CACTUS_SCRIPT).is_file():
+            raise FileNotFoundError(f"Missing {CACTUS_SCRIPT} — git pull or copy scripts/run_cactus_pangenome.sh")
+        cmd = [
+            "bash",
+            CACTUS_SCRIPT,
+            str(JOBSTORE),
+            str(input.seqfile),
+            str(PGD),
+            NAME,
+            PG["reference"],
+            PG["batch_system"],
+            str(WORK),
+            log[0],
+            str(PG["mg_cores"]),
+            str(PG["map_cores"]),
+            str(PG["cons_cores"]),
+            str(PG["index_cores"]),
+            CACTUS_ACTIVATE,
+            PG.get("extra_args", "").strip(),
+        ]
+        subprocess.run(cmd, check=True)
 
 
 rule pangenome_done:
