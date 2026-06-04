@@ -110,6 +110,7 @@ rule cactus_pangenome:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),
     run:
+        import shlex
         import subprocess
 
         PGD.mkdir(parents=True, exist_ok=True)
@@ -133,8 +134,7 @@ rule cactus_pangenome:
             str(PG["cons_cores"]),
             str(PG["index_cores"]),
             CACTUS_ACTIVATE,
-            PG.get("extra_args", "").strip(),
-        ]
+        ] + shlex.split(PG.get("extra_args", ""))
         subprocess.run(cmd, check=True)
 
 

@@ -15,7 +15,8 @@ MAP="${10}"
 CONS="${11}"
 INDEX="${12}"
 ACTIVATE="${13}"
-EXTRA="${14:-}"
+shift 13
+EXTRA_FLAGS=("$@")
 
 mkdir -p "$OUTDIR" "$(dirname "$LOGFILE")" "$WORKDIR"
 
@@ -37,4 +38,4 @@ exec cactus-pangenome "$JOBSTORE" "$SEQFILE" \
   --mapCores "$MAP" \
   --consCores "$CONS" \
   --indexCores "$INDEX" \
-  $EXTRA
+  "${EXTRA_FLAGS[@]}"
