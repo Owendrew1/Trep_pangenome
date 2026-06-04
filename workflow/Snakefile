@@ -1,0 +1,122 @@
+# Minigraph-Cactus pangenome for Trifolium repens.
+# Run from repo root:
+#   snakemake -s Snakefile --directory workflow --cores 4 -p --use-conda
+
+from pathlib import Path
+
+configfile: "../config/config.yaml"
+include: "rules/common.smk"
+
+REFS = Path(config["refs_dir"])
+INDEX_DONE = config["index_done_flag"]
+LOG = config.get("logs_dir", "/scratch/odrew060/Trep_pangenome/pangenome_logs")
+DONE = config.get("done_flag", "/scratch/odrew060/Trep_pangenome/pangenome.done")
+OUT = Path(config["output_dir"])
+USE_HAP_SUBDIR = config.get("refs_use_haplotype_subdir", False)
+
+PG = config["pangenome"]
+NAME = PG["out_name"]
+
+INDEX_BY_ID = {
+    r["row_id"]: r
+    for r in load_samples(config["index_samples_csv"])
+    if r.get("file_type") == "genome"
+}
+PG_ROWS = [r for r in load_samples(config["pangenome_samples_csv"]) if enabled(r)]
+GENOMES = []
+for pr in PG_ROWS:
+    idx = INDEX_BY_ID[pr["row_id"]]
+    GENOMES.append({**idx, "cactus_name": pr["cactus_name"]})
+GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
+
+ASM = lambda r: Path(r["file"].replace(".gz", "")).stem
+
+
+def ref_path(r):
+    base = REFS / r["source"]
+    if USE_HAP_SUBDIR:
+        base = base / r["haplotype"]
+    return base / f"{ASM(r)}.fna"
+
+
+RES = OUT / config.get("results_dir", "results")
+WRK = OUT / config.get("work_dir", "work")
+SEQFILE = RES / "seqfile.txt"
+PGD = RES / NAME
+JOBSTORE = WRK / "jobstore"
+WORK = WRK / "scratch"
+
+
+rule all:
+    input:
+        DONE,
+
+
+rule make_seqfile:
+    input:
+        index_done=INDEX_DONE,
+    output:
+        seqfile=str(SEQFILE),
+    log:
+        f"{LOG}/make_seqfile/seqfile.log",
+    run:
+        Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
+        if PG["reference"] not in GENOME_BY_CACTUS:
+            raise ValueError(f"reference '{PG['reference']}' not in enabled pangenome_genomes.csv")
+        if missing := [str(ref_path(r)) for r in GENOMES if not ref_path(r).is_file()]:
+            raise ValueError(
+                "Missing indexed .fna under refs_dir (finish index_Trep_refs first):\n"
+                + "\n".join(missing)
+            )
+        Path(output.seqfile).parent.mkdir(parents=True, exist_ok=True)
+        with open(output.seqfile, "w") as out, open(log[0], "w") as lf:
+            for r in GENOMES:
+                line = f"{r['cactus_name']}\t{ref_path(r)}\n"
+                out.write(line)
+                lf.write(line)
+
+
+rule cactus_pangenome:
+    input:
+        seqfile=rules.make_seqfile.output.seqfile,
+    output:
+        gbz=f"{PGD}/{NAME}.full.gbz",
+        gfa=f"{PGD}/{NAME}.full.gfa.gz",
+        vcf=f"{PGD}/{NAME}.d2.vcf.gz",
+        hal=f"{PGD}/{NAME}.hal",
+        dist=f"{PGD}/{NAME}.d2.dist",
+        min=f"{PGD}/{NAME}.d2.min",
+    log:
+        f"{LOG}/cactus_pangenome/{NAME}.log",
+    params:
+        jobstore=str(JOBSTORE),
+        work=str(WORK),
+        extra=PG.get("extra_args", ""),
+    resources:
+        mem_mb=PG.get("mem_mb", 128000),
+        runtime=PG.get("runtime", 2880),
+    conda:
+        "envs/cactus.yaml",
+    shell:
+        """
+        set -euo pipefail
+        mkdir -p {PGD} $(dirname {log}) {params.work}
+
+        cactus-pangenome {params.jobstore} {input.seqfile} \
+            --outDir {PGD} --outName {NAME} --reference {PG[reference]} \
+            --batchSystem {PG[batch_system]} --workDir {params.work} --logFile {log} \
+            --mgCores {PG[mg_cores]} --mapCores {PG[map_cores]} \
+            --consCores {PG[cons_cores]} --indexCores {PG[index_cores]} \
+            {params.extra}
+        """
+
+
+rule pangenome_done:
+    input:
+        rules.cactus_pangenome.output,
+    output:
+        DONE,
+    log:
+        f"{LOG}/pangenome_done/pangenome.done.log",
+    shell:
+        "mkdir -p $(dirname {output}) && touch {output} 2> {log}"

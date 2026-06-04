@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+snakemake -s Snakefile --directory workflow --cores "${1:-4}" -p --use-conda

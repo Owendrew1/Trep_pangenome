@@ -1,24 +1,29 @@
-# Your scratch on Nepenthes (ls /scratch → odrew060/). Not home, not github-repos.
-scratch_dir: "/scratch/odrew060/Trep_pangenome"
+# Read-only inputs from index_Trep_refs (do not edit that repo from here).
+refs_dir: "/scratch/references/trifolium/repens"
+index_done_flag: "/scratch/odrew060/index_Trep_refs/ref_indexing.done"
+index_samples_csv: "../../index_Trep_refs/resources/samples.csv"
+# Set true if refs_dir is the old repo results/ tree ({source}/{haplotype}/*.fna).
+refs_use_haplotype_subdir: false
 
-# Read-only inputs from the indexing repo.
-index_trep_refs_results_dir: "~/github-repos/index_Trep_refs/results"
+pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 
-samples_csv: "samples.csv"
+# Pangenome outputs, Cactus jobstore, and scratch (your folder — not the reference tree)
+output_dir: "/scratch/odrew060/Trep_pangenome"
+results_dir: "results"
+work_dir: "work"
+
+# Pipeline logs + done flag (your scratch — same pattern as index_Trep_refs)
+logs_dir: "/scratch/odrew060/Trep_pangenome/pangenome_logs"
+done_flag: "/scratch/odrew060/Trep_pangenome/pangenome.done"
 
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-
-  use_singularity: false
-  singularity_image: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.3"
   batch_system: "slurm"
-
   mg_cores: 48
   map_cores: 32
   cons_cores: 48
   index_cores: 48
   mem_mb: 128000
   runtime: 2880
-
   extra_args: "--filter 2 --giraffe clip filter --gbz clip filter full --gfa clip full --vcf --viz"

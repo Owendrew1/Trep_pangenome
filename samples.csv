@@ -1,9 +1,0 @@
-source,haplotype,assembly,file,cactus_name,results_subdir,enabled
-AgR_To_v5_Griffiths,haploid,GCA_005869975.1_AgR_To_v5,GCA_005869975.1_AgR_To_v5_genomic.fna.gz,AgR_haploid,1,yes
-drTriRepe_Olsen,hap1,GCA_032173615.1_drTriRepe4_hap1_1.5,GCA_032173615.1_drTriRepe4_hap1_1.5_genomic.fna.gz,drTriRepe_Olsen_hap1,1,yes
-drTriRepe_Sanger,hap1,GCA_977963945.1_drTriRepe1.hap1.1,GCA_977963945.1_drTriRepe1.hap1.1_genomic.fna.gz,drTriRepe_Sanger_hap1,1,yes
-drTriRepe_Sanger,hap2,GCA_977964325.1_drTriRepe1.hap2.1,GCA_977964325.1_drTriRepe1.hap2.1_genomic.fna.gz,drTriRepe_Sanger_hap2,2,yes
-drTriRepe_Sanger,hap2_alt,GCA_052626445.1_drTriRepe3_hap2,GCA_052626445.1_drTriRepe3_hap2_genomic.fna.gz,drTriRepe_Sanger_hap2_alt,hap2_alt,no
-UTM_Trep_v1.0,haploid,GCA_030408175.1_UTM_Trep_v1.0,GCA_030408175.1_UTM_Trep_v1.0_genomic.fna.gz,UTM_haploid,haploid,yes
-UTM_Trep_v1.0,hap1,GCA_030914245.1_UTM_Trep_v1.0_hap1,GCA_030914245.1_UTM_Trep_v1.0_hap1_genomic.fna.gz,UTM_hap1,1,yes
-UTM_Trep_v1.0,hap2,GCA_030914255.1_UTM_Trep_v1.0_hap2,GCA_030914255.1_UTM_Trep_v1.0_hap2_genomic.fna.gz,UTM_hap2,2,yes
