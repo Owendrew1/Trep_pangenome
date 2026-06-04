@@ -57,7 +57,20 @@ def ref_path(r):
     return base / f"{ASM(r)}.fna"
 
 
+def write_sanitized_fasta(src: Path, dst: Path) -> None:
+    """Cactus requires ACGTN only; convert IUPAC ambiguity codes (e.g. k) to N."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with open(src) as inf, open(dst, "w") as outf:
+        for line in inf:
+            if line.startswith(">"):
+                outf.write(line)
+            else:
+                s = line.strip()
+                outf.write("".join(c if c.upper() in "ACGTN" else "N" for c in s) + "\n")
+
+
 RES = OUT / config.get("results_dir", "results")
+SAN_DIR = RES / "sanitized_fna"
 WRK = OUT / config.get("work_dir", "work")
 SEQFILE = RES / "seqfile.txt"
 PGD = RES / NAME
@@ -89,9 +102,12 @@ rule make_seqfile:
         Path(output.seqfile).parent.mkdir(parents=True, exist_ok=True)
         with open(output.seqfile, "w") as out, open(log[0], "w") as lf:
             for r in GENOMES:
-                line = f"{r['cactus_name']}\t{ref_path(r)}\n"
+                src = ref_path(r)
+                dst = SAN_DIR / f"{r['cactus_name']}.fna"
+                write_sanitized_fasta(src, dst)
+                line = f"{r['cactus_name']}\t{dst}\n"
                 out.write(line)
-                lf.write(line)
+                lf.write(f"{line}(from {src})\n")
 
 
 rule cactus_pangenome:
