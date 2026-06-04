@@ -1,6 +1,6 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
 # Run from repo root:
-#   snakemake -s Snakefile --directory workflow --cores 4 -p --use-conda
+#   snakemake -s workflow/Snakefile --directory workflow --cores 4 -p --use-conda
 
 from pathlib import Path
 
@@ -26,7 +26,13 @@ PG_ROWS = [r for r in load_samples(config["pangenome_samples_csv"]) if enabled(r
 GENOMES = []
 for pr in PG_ROWS:
     idx = INDEX_BY_ID[pr["row_id"]]
-    GENOMES.append({**idx, "cactus_name": pr["cactus_name"]})
+    GENOMES.append(
+        {
+            **idx,
+            "cactus_name": pr["cactus_name"],
+            "results_subdir": pr.get("results_subdir") or idx.get("haplotype"),
+        }
+    )
 GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
 
 ASM = lambda r: Path(r["file"].replace(".gz", "")).stem
@@ -35,7 +41,7 @@ ASM = lambda r: Path(r["file"].replace(".gz", "")).stem
 def ref_path(r):
     base = REFS / r["source"]
     if USE_HAP_SUBDIR:
-        base = base / r["haplotype"]
+        base = base / r["results_subdir"]
     return base / f"{ASM(r)}.fna"
 
 
