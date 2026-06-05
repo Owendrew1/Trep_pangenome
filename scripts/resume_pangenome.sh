@@ -18,8 +18,13 @@ if [[ ! -f "$ACTIVATE" ]]; then
   echo "Missing Cactus venv: $ACTIVATE" >&2
   exit 1
 fi
+# Custom activate appends to PYTHONPATH/LD_LIBRARY_PATH; unset vars break under set -u.
+export PYTHONPATH="${PYTHONPATH:-}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+set +u
 # shellcheck source=/dev/null
 source "$ACTIVATE"
+set -u
 if ! command -v cactus-pangenome >/dev/null; then
   echo "cactus-pangenome not on PATH after activate" >&2
   exit 1
@@ -52,5 +57,11 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
   exec tmux attach -t "$SESSION"
 fi
 
+if [[ -n "${TMUX:-}" ]]; then
+  echo "Already in tmux — starting pipeline in this window (detach: Ctrl+b then d)."
+  bash -lc "$RUN"
+  exit $?
+fi
+
 echo "Starting tmux session '$SESSION' (detach: Ctrl+b then d)"
-tmux new-session -s "$SESSION" "$RUN; echo '=== snakemake exited ==='; exec bash"
+exec tmux new-session -s "$SESSION" "$RUN; echo '=== snakemake exited ==='; exec bash"

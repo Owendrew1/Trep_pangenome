@@ -24,10 +24,21 @@ if [[ ! -f "$ACTIVATE" ]]; then
   echo "Missing cactus venv activate: $ACTIVATE" >&2
   exit 1
 fi
+export PYTHONPATH="${PYTHONPATH:-}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+set +u
 # shellcheck source=/dev/null
 source "$ACTIVATE"
+set -u
+
+RESTART=()
+if [[ -d "$JOBSTORE" ]] && [[ -n "$(ls -A "$JOBSTORE" 2>/dev/null)" ]]; then
+  echo "Jobstore exists — resuming with --restart" >&2
+  RESTART=(--restart)
+fi
 
 exec cactus-pangenome "$JOBSTORE" "$SEQFILE" \
+  "${RESTART[@]}" \
   --outDir "$OUTDIR" \
   --outName "$OUTNAME" \
   --reference "$REFERENCE" \
