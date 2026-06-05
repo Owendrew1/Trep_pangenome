@@ -24,18 +24,26 @@ Trep_pangenome/
   workflow/envs/cactus.yaml
 ```
 
-## Run
+## Run (Nepenthes)
 
 ```bash
-conda activate snakemake
+conda activate snakemake   # if needed for snakemake only
 cd ~/github-repos/Trep_pangenome
-./scripts/run_pangenome.sh 4
+git pull origin main
+
+# Check prior progress (Jun 4 run got to minigraph mapping before OOM)
+bash scripts/check_pangenome.sh
+
+# Resume in tmux (do not delete work/jobstore)
+bash scripts/resume_pangenome.sh
 ```
 
 Requires **index_Trep_refs** finished (`index_done_flag` exists, `.fna` under `refs_dir`).
+
+**If it dies again at minigraph mapping:** lower `map_cores` (e.g. 8) and/or `--maxCores` in `config/config.yaml`.
 
 If you still use the **old** repo `index_Trep_refs/results/` layout (`{source}/{haplotype}/*.fna`), set `refs_dir` to that folder and `refs_use_haplotype_subdir: true`.
 
 ## Status
 
-Not run yet — supervisor review pending.
+Jun 4 run reached minigraph mapping then OOM (SIGTERM). Jobstore on scratch supports resume after lowering `map_cores` / `--maxCores`.

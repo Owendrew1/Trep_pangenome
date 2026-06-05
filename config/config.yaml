@@ -35,10 +35,12 @@ pangenome:
   # Nepenthes (rap-p*): no sbatch/module — use single_machine (same idea as index_Trep_refs --cores N).
   # slurm: only if sbatch/squeue exist on the host you launch from.
   batch_system: "single_machine"
-  mg_cores: 48
-  map_cores: 32
-  cons_cores: 48
-  index_cores: 48
+  # Jun 4 run OOM'd when 8 minigraph_map jobs ran at map_cores=32 (~72 GiB each). Keep map_cores
+  # modest; --maxCores caps how many Cactus jobs run at once on single_machine.
+  mg_cores: 32
+  map_cores: 16
+  cons_cores: 32
+  index_cores: 32
   mem_mb: 128000
   runtime: 2880
-  extra_args: "--filter 2 --giraffe clip filter --gbz clip filter full --gfa clip full --vcf --viz"
+  extra_args: "--filter 2 --giraffe clip filter --gbz clip filter full --gfa clip full --vcf --viz --maxCores 48"
