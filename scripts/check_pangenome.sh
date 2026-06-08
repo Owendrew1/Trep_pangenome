@@ -19,7 +19,6 @@ bar
 
 if [[ -f "$LOG" ]]; then
   echo "  Mapped      $(grep -c 'Successfully ran:.*gaf2paf' "$LOG" 2>/dev/null || echo 0)/${NGEN} genomes"
-  echo "  ▶ NOW         $(grep 'minigraph ' "$LOG" | tail -1 | grep -oE '/[A-Za-z0-9_]+\.fa' | tail -1 | tr -d '/' || echo '(between steps)')"
 fi
 
 echo ""
@@ -28,6 +27,4 @@ for f in "${NAME}.full.gbz" "${NAME}.full.hal" "${NAME}.d2.vcf.gz"; do
   [[ -f "$RES/$f" ]] && echo "  ✅ $f" || echo "  ❌ $f"
 done
 
-echo ""
-ps aux | grep "$(whoami)" | grep -E 'snakemake|cactus|minigraph' | grep -v grep | head -3 || echo "  (no pipeline processes)"
 bar

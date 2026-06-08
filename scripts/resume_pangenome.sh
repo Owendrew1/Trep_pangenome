@@ -8,10 +8,6 @@ ACTIVATE="$(grep 'cactus_activate:' "$CFG" | sed 's/.*: *"\?\([^"]*\)"\?.*/\1/')
 
 cd "$ROOT"
 
-echo "=== Preflight ==="
-echo "Host: $(hostname)"
-free -h | head -2
-
 export PYTHONPATH="${PYTHONPATH:-}"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
 set +u
