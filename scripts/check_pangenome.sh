@@ -1,20 +1,33 @@
 #!/usr/bin/env bash
-# Quick status without tmux. Usage: bash scripts/check_pangenome.sh
+# Status check. Usage: bash scripts/check_pangenome.sh
 set -euo pipefail
 
-BASE="/scratch/odrew060/Trep_pangenome"
-LOG="$BASE/pangenome_logs/cactus_pangenome/trifolium_repens.log"
+source "$(dirname "$0")/config_paths.sh"
 
-echo "=== Host ==="
-hostname
-echo "=== Done flag ==="
-ls -la "$BASE/pangenome.done" 2>&1 || true
-echo "=== Graph outputs ==="
-ls -lh "$BASE/results/trifolium_repens/" 2>&1 || true
-echo "=== Seqfile / sanitized FASTAs ==="
-ls -lh "$BASE/results/seqfile.txt" 2>&1 || true
-ls "$BASE/results/sanitized_fna/" 2>&1 | head -10 || true
-echo "=== Running processes ==="
-ps aux | grep -E 'snakemake|cactus|toil' | grep -v grep || echo "(none)"
-echo "=== Latest log ==="
-tail -15 "$LOG" 2>&1 || echo "(no log yet)"
+LOG="$OUT/pangenome_logs/cactus_pangenome/${NAME}.log"
+RES="$OUT/results/$NAME"
+
+bar() { printf '%s\n' "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"; }
+
+bar
+if [[ -f "$OUT/pangenome.done" ]]; then
+  echo "  STATUS      ✅ DONE"
+else
+  echo "  STATUS      🔄 not finished (no pangenome.done)"
+fi
+bar
+
+if [[ -f "$LOG" ]]; then
+  echo "  Mapped      $(grep -c 'Successfully ran:.*gaf2paf' "$LOG" 2>/dev/null || echo 0)/${NGEN} genomes"
+  echo "  ▶ NOW         $(grep 'minigraph ' "$LOG" | tail -1 | grep -oE '/[A-Za-z0-9_]+\.fa' | tail -1 | tr -d '/' || echo '(between steps)')"
+fi
+
+echo ""
+echo "  KEY OUTPUTS:"
+for f in "${NAME}.full.gbz" "${NAME}.full.hal" "${NAME}.d2.vcf.gz"; do
+  [[ -f "$RES/$f" ]] && echo "  ✅ $f" || echo "  ❌ $f"
+done
+
+echo ""
+ps aux | grep "$(whoami)" | grep -E 'snakemake|cactus|minigraph' | grep -v grep | head -3 || echo "  (no pipeline processes)"
+bar

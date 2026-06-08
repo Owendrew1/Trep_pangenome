@@ -1,33 +1,30 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
-# Run from repo root:
-#   snakemake -s workflow/Snakefile --directory workflow --cores 4 -p
+# Run from repo root: ./scripts/run_pangenome.sh
 
+import shlex
+import subprocess
 from pathlib import Path
 
 configfile: "../config/config.yaml"
 include: "rules/common.smk"
 
-REFS = Path(config["refs_dir"])
-INDEX_DONE = config["index_done_flag"]
-LOG = config.get("logs_dir", "/scratch/odrew060/Trep_pangenome/pangenome_logs")
-DONE = config.get("done_flag", "/scratch/odrew060/Trep_pangenome/pangenome.done")
 OUT = Path(config["output_dir"])
+REFS = Path(config["refs_dir"])
+LOG = f"{OUT}/pangenome_logs"
+DONE = f"{OUT}/pangenome.done"
+RES = OUT / "results"
+WRK = OUT / "work"
+INDEX_DONE = config["index_done_flag"]
 USE_HAP_SUBDIR = config.get("refs_use_haplotype_subdir", False)
 
 PG = config["pangenome"]
 NAME = PG["out_name"]
-CACTUS_ACTIVATE = PG.get("cactus_activate", "")
-# Repo root (parent of workflow/). Do not use __file__ — breaks under --directory workflow.
-REPO_ROOT = Path(workflow.basedir).parent
-CACTUS_SCRIPT = str(REPO_ROOT / "scripts" / "run_cactus_pangenome.sh")
-CONTAINER = PG.get("container", "")
-BIND_FLAGS = " ".join(
-    f"-B {p}:{p}"
-    for p in PG.get(
-        "container_bind",
-        ["/scratch/odrew060", "/home/uottawa.o.univ/odrew060"],
-    )
-)
+PGD = RES / NAME
+SEQFILE = RES / "seqfile.txt"
+SAN_DIR = RES / "sanitized_fna"
+JOBSTORE = WRK / "jobstore"
+WORK = WRK / "scratch"
+CACTUS_SCRIPT = str(Path(workflow.basedir).parent / "scripts" / "run_cactus_pangenome.sh")
 
 INDEX_BY_ID = {
     r["row_id"]: r
@@ -35,18 +32,15 @@ INDEX_BY_ID = {
     if r.get("file_type") == "genome"
 }
 PG_ROWS = [r for r in load_samples(config["pangenome_samples_csv"]) if enabled(r)]
-GENOMES = []
-for pr in PG_ROWS:
-    idx = INDEX_BY_ID[pr["row_id"]]
-    GENOMES.append(
-        {
-            **idx,
-            "cactus_name": pr["cactus_name"],
-            "results_subdir": pr.get("results_subdir") or idx.get("haplotype"),
-        }
-    )
+GENOMES = [
+    {
+        **INDEX_BY_ID[pr["row_id"]],
+        "cactus_name": pr["cactus_name"],
+        "results_subdir": pr.get("results_subdir") or INDEX_BY_ID[pr["row_id"]].get("haplotype"),
+    }
+    for pr in PG_ROWS
+]
 GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
-
 ASM = lambda r: Path(r["file"].replace(".gz", "")).stem
 
 
@@ -67,15 +61,6 @@ def write_sanitized_fasta(src: Path, dst: Path) -> None:
             else:
                 s = line.strip()
                 outf.write("".join(c if c.upper() in "ACGTN" else "N" for c in s) + "\n")
-
-
-RES = OUT / config.get("results_dir", "results")
-SAN_DIR = RES / "sanitized_fna"
-WRK = OUT / config.get("work_dir", "work")
-SEQFILE = RES / "seqfile.txt"
-PGD = RES / NAME
-JOBSTORE = WRK / "jobstore"
-WORK = WRK / "scratch"
 
 
 rule all:
@@ -117,23 +102,20 @@ rule cactus_pangenome:
         gbz=f"{PGD}/{NAME}.full.gbz",
         gfa=f"{PGD}/{NAME}.full.gfa.gz",
         vcf=f"{PGD}/{NAME}.d2.vcf.gz",
-        hal=f"{PGD}/{NAME}.hal",
-        dist=f"{PGD}/{NAME}.d2.dist",
-        min=f"{PGD}/{NAME}.d2.min",
+        hal=f"{PGD}/{NAME}.full.hal",
+        dist=f"{PGD}/{NAME}.dist",
+        min=f"{PGD}/{NAME}.min",
     log:
         f"{LOG}/cactus_pangenome/{NAME}.log",
     resources:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),
     run:
-        import shlex
-        import subprocess
-
         PGD.mkdir(parents=True, exist_ok=True)
         WORK.mkdir(parents=True, exist_ok=True)
         Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
         if not Path(CACTUS_SCRIPT).is_file():
-            raise FileNotFoundError(f"Missing {CACTUS_SCRIPT} — git pull or copy scripts/run_cactus_pangenome.sh")
+            raise FileNotFoundError(f"Missing {CACTUS_SCRIPT}")
         cmd = [
             "bash",
             CACTUS_SCRIPT,
@@ -149,7 +131,7 @@ rule cactus_pangenome:
             str(PG["map_cores"]),
             str(PG["cons_cores"]),
             str(PG["index_cores"]),
-            CACTUS_ACTIVATE,
+            PG["cactus_activate"],
         ] + shlex.split(PG.get("extra_args", ""))
         subprocess.run(cmd, check=True)
 
@@ -159,7 +141,5 @@ rule pangenome_done:
         rules.cactus_pangenome.output,
     output:
         DONE,
-    log:
-        f"{LOG}/pangenome_done/pangenome.done.log",
     shell:
-        "mkdir -p $(dirname {output}) && touch {output} 2> {log}"
+        "touch {output}"

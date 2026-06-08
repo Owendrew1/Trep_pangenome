@@ -1,42 +1,21 @@
-# Read-only inputs from index_Trep_refs (do not edit that repo from here).
-#
-# Legacy layout (yesterday's run): FASTAs under index_Trep_refs/results/{source}/{hap1|hap2|haploid}/
-# New layout (re-run indexing on scratch): refs_dir + index_done_flag below commented block.
+# Indexed FASTAs from index_Trep_refs (read-only).
 refs_dir: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results"
 index_done_flag: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results/UTM_Trep_v1.0/haploid/ref.done"
 refs_use_haplotype_subdir: true
-#
-# refs_dir: "/scratch/references/trifolium/repens"
-# index_done_flag: "/scratch/odrew060/index_Trep_refs/ref_indexing.done"
-# refs_use_haplotype_subdir: false
+# New index layout: refs_dir: "/scratch/references/trifolium/repens"
+#   index_done_flag: "/scratch/references/trifolium/repens/Trep_ref_indexing.done"
+#   refs_use_haplotype_subdir: false
 
 index_samples_csv: "../../index_Trep_refs/resources/samples.csv"
 pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 
-# Pangenome outputs, Cactus jobstore, and scratch (your folder — not the reference tree)
 output_dir: "/scratch/odrew060/Trep_pangenome"
-results_dir: "results"
-work_dir: "work"
-
-# Pipeline logs + done flag (your scratch — same pattern as index_Trep_refs)
-logs_dir: "/scratch/odrew060/Trep_pangenome/pangenome_logs"
-done_flag: "/scratch/odrew060/Trep_pangenome/pangenome.done"
 
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-  # Cactus: pre-built binaries (GitHub). quay.io/docker often blocked on Nepenthes/Mac.
   cactus_activate: "/scratch/odrew060/Trep_pangenome/cactus-bin-v2.9.3/venv-cactus-v2.9.3/bin/activate"
-  # Fallback if you have a local .sif (not docker:// — quay times out):
-  # container: "/scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.3.sif"
-  container_bind:
-    - /scratch/odrew060
-    - /home/uottawa.o.univ/odrew060
-  # Nepenthes (rap-p*): no sbatch/module — use single_machine (same idea as index_Trep_refs --cores N).
-  # slurm: only if sbatch/squeue exist on the host you launch from.
   batch_system: "single_machine"
-  # Jun 4 run OOM'd when 8 minigraph_map jobs ran at map_cores=32 (~72 GiB each). Keep map_cores
-  # modest; --maxCores caps how many Cactus jobs run at once on single_machine.
   mg_cores: 32
   map_cores: 16
   cons_cores: 32
