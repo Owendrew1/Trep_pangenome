@@ -4,17 +4,22 @@ set -euo pipefail
 
 source "$(dirname "$0")/config_paths.sh"
 SESSION="${1:-pangenome}"
-ACTIVATE="$(grep 'cactus_activate:' "$CFG" | sed 's/.*: *"\?\([^"]*\)"\?.*/\1/')"
+ACTIVATE="$(grep 'cactus_activate:' "$CFG" | grep -v '^[[:space:]]*#' | sed 's/.*: *"\?\([^"]*\)"\?.*/\1/' | head -1)"
 
 cd "$ROOT"
 
-export PYTHONPATH="${PYTHONPATH:-}"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
-set +u
-# shellcheck source=/dev/null
-source "$ACTIVATE"
-set -u
-command -v cactus-pangenome >/dev/null
+if [[ -n "$ACTIVATE" ]] && [[ -f "$ACTIVATE" ]]; then
+  export PYTHONPATH="${PYTHONPATH:-}"
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+  set +u
+  # shellcheck source=/dev/null
+  source "$ACTIVATE"
+  set -u
+fi
+command -v cactus-pangenome >/dev/null || {
+  echo "cactus-pangenome not on PATH; use conda env or set pangenome.cactus_activate" >&2
+  exit 1
+}
 
 [[ -f "$INDEX_DONE" ]] || { echo "Indexing not finished: $INDEX_DONE" >&2; exit 1; }
 [[ -f "$OUT/pangenome.done" ]] && { echo "Already done: $OUT/pangenome.done"; exit 0; }

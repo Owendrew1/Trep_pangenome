@@ -20,16 +20,21 @@ EXTRA_FLAGS=("$@")
 
 mkdir -p "$OUTDIR" "$(dirname "$LOGFILE")" "$WORKDIR"
 
-if [[ ! -f "$ACTIVATE" ]]; then
-  echo "Missing cactus venv activate: $ACTIVATE" >&2
+if [[ -n "$ACTIVATE" ]] && [[ -f "$ACTIVATE" ]]; then
+  export PYTHONPATH="${PYTHONPATH:-}"
+  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+  set +u
+  # shellcheck source=/dev/null
+  source "$ACTIVATE"
+  set -u
+elif [[ -n "$ACTIVATE" ]]; then
+  echo "cactus_activate set but not found: $ACTIVATE" >&2
   exit 1
 fi
-export PYTHONPATH="${PYTHONPATH:-}"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
-set +u
-# shellcheck source=/dev/null
-source "$ACTIVATE"
-set -u
+command -v cactus-pangenome >/dev/null || {
+  echo "cactus-pangenome not on PATH (use snakemake --use-conda or set pangenome.cactus_activate)" >&2
+  exit 1
+}
 
 RESTART=()
 if [[ -d "$JOBSTORE" ]] && [[ -n "$(ls -A "$JOBSTORE" 2>/dev/null)" ]]; then

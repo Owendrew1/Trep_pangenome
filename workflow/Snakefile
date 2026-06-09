@@ -1,5 +1,7 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
-# Run from repo root: ./scripts/run_pangenome.sh
+# Run from repo root:
+#   ./scripts/run_pangenome.sh 1
+# (install: conda env create -f environment.yaml && conda activate <env>)
 
 from pathlib import Path
 
@@ -80,12 +82,14 @@ rule cactus_pangenome:
         work=str(WORK),
         reference=PG["reference"],
         batch=PG["batch_system"],
-        activate=PG["cactus_activate"],
+        activate=PG.get("cactus_activate", ""),
         mg=PG["mg_cores"],
         map=PG["map_cores"],
         cons=PG["cons_cores"],
         index=PG["index_cores"],
         extra=PG.get("extra_args", ""),
+    conda:
+        "envs/cactus.yaml",
     resources:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),

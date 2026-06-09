@@ -13,7 +13,10 @@ output_dir: "/scratch/odrew060/Trep_pangenome"
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-  cactus_activate: "/scratch/odrew060/Trep_pangenome/cactus-bin-v2.9.3/venv-cactus-v2.9.3/bin/activate"
+  # Default: empty — Snakemake installs Cactus via workflow/envs/cactus.yaml (--use-conda).
+  cactus_activate: ""
+  # Nepenthes manual binary install:
+  # cactus_activate: "/scratch/odrew060/Trep_pangenome/cactus-bin-v2.9.3/venv-cactus-v2.9.3/bin/activate"
   batch_system: "single_machine"
   mg_cores: 32
   map_cores: 16
