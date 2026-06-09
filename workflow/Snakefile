@@ -26,13 +26,7 @@ JOBSTORE = WRK / "jobstore"
 WORK = WRK / "scratch"
 CACTUS_SCRIPT = str(Path(workflow.basedir).parent / "scripts" / "run_cactus_pangenome.sh")
 
-INDEX_BY_ID = {
-    r["row_id"]: r
-    for r in load_samples(config["index_samples_csv"])
-    if r.get("file_type") == "genome"
-}
-PG_ROWS = load_samples(config["pangenome_samples_csv"])
-GENOMES = pangenome_genomes(INDEX_BY_ID, PG_ROWS)
+GENOMES = load_samples(config["pangenome_samples_csv"])
 GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
 
 

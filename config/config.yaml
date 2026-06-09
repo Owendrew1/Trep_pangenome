@@ -6,7 +6,6 @@ refs_use_haplotype_subdir: true
 #   index_done_flag: "/scratch/references/trifolium/repens/Trep_ref_indexing.done"
 #   refs_use_haplotype_subdir: false
 
-index_samples_csv: "../../index_Trep_refs/resources/samples.csv"
 pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 
 output_dir: "/scratch/odrew060/Trep_pangenome"

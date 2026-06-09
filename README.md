@@ -9,7 +9,9 @@ Minigraph-Cactus pangenome for *Trifolium repens*. Consumes indexed FASTAs from 
 | `refs_dir` | Indexed `.fna` tree from indexing |
 | `index_done_flag` | Proof indexing finished |
 | `output_dir` | Scratch outputs (logs, results, work, done flag derived from this) |
-| `pangenome_samples_csv` | Genomes to include (every row) + Cactus names |
+| `pangenome_samples_csv` | Genome manifest (`cactus_name`, `source`, `file`, `results_subdir`) — every row is included |
+
+`resources/pangenome_genomes.csv` is the only sample list for this pipeline (indexed FASTAs still come from `index_Trep_refs` via `refs_dir`).
 
 ## Run
 

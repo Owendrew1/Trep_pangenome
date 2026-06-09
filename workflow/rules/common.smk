@@ -25,17 +25,6 @@ def ref_path(r, refs_dir, use_hap_subdir=False):
     return base / f"{asm(r)}.fna"
 
 
-def pangenome_genomes(index_by_id, pg_rows):
-    return [
-        {
-            **index_by_id[pr["row_id"]],
-            "cactus_name": pr["cactus_name"],
-            "results_subdir": pr.get("results_subdir") or index_by_id[pr["row_id"]].get("haplotype"),
-        }
-        for pr in pg_rows
-    ]
-
-
 def write_sanitized_fasta(src, dst):
     """Cactus requires ACGTN only; convert IUPAC ambiguity codes (e.g. k) to N."""
     src, dst = Path(src), Path(dst)
