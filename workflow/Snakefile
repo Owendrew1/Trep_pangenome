@@ -1,8 +1,6 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
 # Run from repo root: ./scripts/run_pangenome.sh
 
-import shlex
-import subprocess
 from pathlib import Path
 
 configfile: "../config/config.yaml"
@@ -76,33 +74,23 @@ rule cactus_pangenome:
         min=f"{PGD}/{NAME}.min",
     log:
         f"{LOG}/cactus_pangenome/{NAME}.log",
+    params:
+        script=CACTUS_SCRIPT,
+        jobstore=str(JOBSTORE),
+        work=str(WORK),
+        reference=PG["reference"],
+        batch=PG["batch_system"],
+        activate=PG["cactus_activate"],
+        mg=PG["mg_cores"],
+        map=PG["map_cores"],
+        cons=PG["cons_cores"],
+        index=PG["index_cores"],
+        extra=PG.get("extra_args", ""),
     resources:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),
-    run:
-        PGD.mkdir(parents=True, exist_ok=True)
-        WORK.mkdir(parents=True, exist_ok=True)
-        Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
-        if not Path(CACTUS_SCRIPT).is_file():
-            raise FileNotFoundError(f"Missing {CACTUS_SCRIPT}")
-        cmd = [
-            "bash",
-            CACTUS_SCRIPT,
-            str(JOBSTORE),
-            str(input.seqfile),
-            str(PGD),
-            NAME,
-            PG["reference"],
-            PG["batch_system"],
-            str(WORK),
-            log[0],
-            str(PG["mg_cores"]),
-            str(PG["map_cores"]),
-            str(PG["cons_cores"]),
-            str(PG["index_cores"]),
-            PG["cactus_activate"],
-        ] + shlex.split(PG.get("extra_args", ""))
-        subprocess.run(cmd, check=True)
+    shell:
+        "bash {params.script} {params.jobstore} {input.seqfile} {PGD} {NAME} {params.reference} {params.batch} {params.work} {log} {params.mg} {params.map} {params.cons} {params.index} {params.activate} {params.extra}"
 
 
 rule pangenome_done:
