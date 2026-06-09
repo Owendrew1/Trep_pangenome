@@ -9,7 +9,7 @@ configfile: "../config/config.yaml"
 include: "rules/common.smk"
 
 OUT = Path(config["output_dir"])
-REFS = Path(config["refs_dir"])
+REFS = config["refs_dir"]
 LOG = f"{OUT}/pangenome_logs"
 DONE = f"{OUT}/pangenome.done"
 RES = OUT / "results"
@@ -32,35 +32,8 @@ INDEX_BY_ID = {
     if r.get("file_type") == "genome"
 }
 PG_ROWS = [r for r in load_samples(config["pangenome_samples_csv"]) if enabled(r)]
-GENOMES = [
-    {
-        **INDEX_BY_ID[pr["row_id"]],
-        "cactus_name": pr["cactus_name"],
-        "results_subdir": pr.get("results_subdir") or INDEX_BY_ID[pr["row_id"]].get("haplotype"),
-    }
-    for pr in PG_ROWS
-]
+GENOMES = pangenome_genomes(INDEX_BY_ID, PG_ROWS)
 GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
-ASM = lambda r: Path(r["file"].replace(".gz", "")).stem
-
-
-def ref_path(r):
-    base = REFS / r["source"]
-    if USE_HAP_SUBDIR:
-        base = base / r["results_subdir"]
-    return base / f"{ASM(r)}.fna"
-
-
-def write_sanitized_fasta(src: Path, dst: Path) -> None:
-    """Cactus requires ACGTN only; convert IUPAC ambiguity codes (e.g. k) to N."""
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    with open(src) as inf, open(dst, "w") as outf:
-        for line in inf:
-            if line.startswith(">"):
-                outf.write(line)
-            else:
-                s = line.strip()
-                outf.write("".join(c if c.upper() in "ACGTN" else "N" for c in s) + "\n")
 
 
 rule all:
@@ -79,7 +52,9 @@ rule make_seqfile:
         Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
         if PG["reference"] not in GENOME_BY_CACTUS:
             raise ValueError(f"reference '{PG['reference']}' not in enabled pangenome_genomes.csv")
-        if missing := [str(ref_path(r)) for r in GENOMES if not ref_path(r).is_file()]:
+        if missing := [
+            str(ref_path(r, REFS, USE_HAP_SUBDIR)) for r in GENOMES if not ref_path(r, REFS, USE_HAP_SUBDIR).is_file()
+        ]:
             raise ValueError(
                 "Missing indexed .fna under refs_dir (finish index_Trep_refs first):\n"
                 + "\n".join(missing)
@@ -87,7 +62,7 @@ rule make_seqfile:
         Path(output.seqfile).parent.mkdir(parents=True, exist_ok=True)
         with open(output.seqfile, "w") as out, open(log[0], "w") as lf:
             for r in GENOMES:
-                src = ref_path(r)
+                src = ref_path(r, REFS, USE_HAP_SUBDIR)
                 dst = SAN_DIR / f"{r['cactus_name']}.fna"
                 write_sanitized_fasta(src, dst)
                 line = f"{r['cactus_name']}\t{dst}\n"
