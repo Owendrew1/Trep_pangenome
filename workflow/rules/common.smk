@@ -14,10 +14,6 @@ def load_samples(path):
     return rows
 
 
-def enabled(r):
-    return r.get("enabled", "yes").lower() in ("yes", "y", "1", "true")
-
-
 def asm(r):
     return Path(r["file"].replace(".gz", "")).stem
 

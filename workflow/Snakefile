@@ -31,7 +31,7 @@ INDEX_BY_ID = {
     for r in load_samples(config["index_samples_csv"])
     if r.get("file_type") == "genome"
 }
-PG_ROWS = [r for r in load_samples(config["pangenome_samples_csv"]) if enabled(r)]
+PG_ROWS = load_samples(config["pangenome_samples_csv"])
 GENOMES = pangenome_genomes(INDEX_BY_ID, PG_ROWS)
 GENOME_BY_CACTUS = {r["cactus_name"]: r for r in GENOMES}
 
@@ -51,7 +51,7 @@ rule make_seqfile:
     run:
         Path(log[0]).parent.mkdir(parents=True, exist_ok=True)
         if PG["reference"] not in GENOME_BY_CACTUS:
-            raise ValueError(f"reference '{PG['reference']}' not in enabled pangenome_genomes.csv")
+            raise ValueError(f"reference '{PG['reference']}' not in pangenome_genomes.csv")
         if missing := [
             str(ref_path(r, REFS, USE_HAP_SUBDIR)) for r in GENOMES if not ref_path(r, REFS, USE_HAP_SUBDIR).is_file()
         ]:
