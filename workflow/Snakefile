@@ -1,7 +1,7 @@
 # Minigraph-Cactus pangenome for Trifolium repens.
 # Run from repo root:
 #   ./scripts/run_pangenome.sh 1
-# (install: conda env create -f environment.yaml && conda activate <env>)
+# Setup: conda env create -f environment.yaml  (Snakemake only; Cactus runs in Apptainer)
 
 from pathlib import Path
 
@@ -18,6 +18,7 @@ INDEX_DONE = config["index_done_flag"]
 USE_HAP_SUBDIR = config.get("refs_use_haplotype_subdir", False)
 
 PG = config["pangenome"]
+CONTAINER = PG.get("container", "")
 NAME = PG["out_name"]
 PGD = RES / NAME
 SEQFILE = RES / "seqfile.txt"
@@ -82,19 +83,18 @@ rule cactus_pangenome:
         work=str(WORK),
         reference=PG["reference"],
         batch=PG["batch_system"],
-        activate=PG.get("cactus_activate", ""),
         mg=PG["mg_cores"],
         map=PG["map_cores"],
         cons=PG["cons_cores"],
         index=PG["index_cores"],
         extra=PG.get("extra_args", ""),
-    conda:
-        "envs/cactus.yaml",
+    container:
+        CONTAINER,
     resources:
         mem_mb=PG.get("mem_mb", 128000),
         runtime=PG.get("runtime", 2880),
     shell:
-        "bash {params.script} {params.jobstore} {input.seqfile} {PGD} {NAME} {params.reference} {params.batch} {params.work} {log} {params.mg} {params.map} {params.cons} {params.index} {params.activate} {params.extra}"
+        "bash {params.script} {params.jobstore} {input.seqfile} {PGD} {NAME} {params.reference} {params.batch} {params.work} {log} {params.mg} {params.map} {params.cons} {params.index} {params.extra}"
 
 
 rule pangenome_done:

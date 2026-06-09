@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Called by workflow/Snakefile — one-line cactus-pangenome (avoids Snakemake line-join bugs).
+# Called inside the Cactus Apptainer image by workflow/Snakefile.
 set -euo pipefail
 
 JOBSTORE="$1"
@@ -14,27 +14,10 @@ MG="$9"
 MAP="${10}"
 CONS="${11}"
 INDEX="${12}"
-ACTIVATE="${13}"
-shift 13
+shift 12
 EXTRA_FLAGS=("$@")
 
 mkdir -p "$OUTDIR" "$(dirname "$LOGFILE")" "$WORKDIR"
-
-if [[ -n "$ACTIVATE" ]] && [[ -f "$ACTIVATE" ]]; then
-  export PYTHONPATH="${PYTHONPATH:-}"
-  export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
-  set +u
-  # shellcheck source=/dev/null
-  source "$ACTIVATE"
-  set -u
-elif [[ -n "$ACTIVATE" ]]; then
-  echo "cactus_activate set but not found: $ACTIVATE" >&2
-  exit 1
-fi
-command -v cactus-pangenome >/dev/null || {
-  echo "cactus-pangenome not on PATH (use snakemake --use-conda or set pangenome.cactus_activate)" >&2
-  exit 1
-}
 
 RESTART=()
 if [[ -d "$JOBSTORE" ]] && [[ -n "$(ls -A "$JOBSTORE" 2>/dev/null)" ]]; then

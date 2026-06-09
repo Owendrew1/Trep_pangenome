@@ -13,10 +13,12 @@ output_dir: "/scratch/odrew060/Trep_pangenome"
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-  # Default: empty — Snakemake installs Cactus via workflow/envs/cactus.yaml (--use-conda).
-  cactus_activate: ""
-  # Nepenthes manual binary install:
-  # cactus_activate: "/scratch/odrew060/Trep_pangenome/cactus-bin-v2.9.3/venv-cactus-v2.9.3/bin/activate"
+  # Cactus via Apptainer. Pull once: apptainer pull containers/cactus_v2.9.8.sif docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8
+  container: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8"
+  # container: "/scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.8.sif"
+  container_bind:
+    - /scratch/odrew060
+    - /home/uottawa.o.univ/odrew060
   batch_system: "single_machine"
   mg_cores: 32
   map_cores: 16

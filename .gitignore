@@ -1,4 +1,5 @@
 .snakemake/
 results/
 work/
+containers/*.sif
 .DS_Store

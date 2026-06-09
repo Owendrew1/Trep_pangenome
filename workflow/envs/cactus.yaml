@@ -1,6 +1,0 @@
-# Snakemake deploys this env for rule cactus_pangenome (--use-conda).
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - cactus=2.9.9
