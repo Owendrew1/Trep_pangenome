@@ -24,12 +24,18 @@ conda activate snakemake
 
 Edit `config/config.yaml`: `refs_dir`, `index_done_flag`, `output_dir`, `container`, `container_bind`.
 
-Cactus runs from the official Apptainer image (`pangenome.container`). First run downloads it (needs network). If `quay.io` is blocked, pull a `.sif` elsewhere and point `container` at the local file:
+Cactus runs from a local `.sif` (`pangenome.container`). If the cluster cannot reach `quay.io`, pull on a machine with Docker, transfer, and build on Nepenthes:
 
 ```bash
-mkdir -p containers
-apptainer pull containers/cactus_v2.9.8.sif \
-  docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8
+# Mac
+docker pull quay.io/comparative-genomics-toolkit/cactus:v2.9.8
+docker save quay.io/comparative-genomics-toolkit/cactus:v2.9.8 -o containers/cactus_v2.9.8.tar
+scp containers/cactus_v2.9.8.tar odrew060@Nepenthes.rdc.uolocal:/scratch/odrew060/Trep_pangenome/containers/
+
+# Nepenthes
+mkdir -p /scratch/odrew060/Trep_pangenome/containers
+apptainer build /scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.8.sif \
+  docker-archive:///scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.8.tar
 ```
 
 ## Run

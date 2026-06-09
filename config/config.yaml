@@ -13,9 +13,9 @@ output_dir: "/scratch/odrew060/Trep_pangenome"
 pangenome:
   out_name: "trifolium_repens"
   reference: "UTM_haploid"
-  # Cactus via Apptainer. Pull once: apptainer pull containers/cactus_v2.9.8.sif docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8
-  container: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8"
-  # container: "/scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.8.sif"
+  # Local .sif (quay.io blocked on Nepenthes). See README for docker save → scp → apptainer build.
+  container: "/scratch/odrew060/Trep_pangenome/containers/cactus_v2.9.8.sif"
+  # container: "docker://quay.io/comparative-genomics-toolkit/cactus:v2.9.8"
   container_bind:
     - /scratch/odrew060
     - /home/uottawa.o.univ/odrew060
