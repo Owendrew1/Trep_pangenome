@@ -62,6 +62,6 @@ Under `{output_dir}/results/trifolium_repens/`:
 | `trifolium_repens.full.gbz` + `.dist` + `.min` | Giraffe mapping |
 | `trifolium_repens.full.gfa.gz` | Graph (GFA) |
 | `trifolium_repens.full.hal` | HAL alignment |
-| `trifolium_repens.d2.vcf.gz` | Variants |
+| `trifolium_repens.vcf.gz` | Variants |
 
 Done flag: `{output_dir}/pangenome.done`

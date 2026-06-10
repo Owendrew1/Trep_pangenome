@@ -71,7 +71,7 @@ rule cactus_pangenome:
     output:
         gbz=f"{PGD}/{NAME}.full.gbz",
         gfa=f"{PGD}/{NAME}.full.gfa.gz",
-        vcf=f"{PGD}/{NAME}.d2.vcf.gz",
+        vcf=f"{PGD}/{NAME}.vcf.gz",
         hal=f"{PGD}/{NAME}.full.hal",
         dist=f"{PGD}/{NAME}.dist",
         min=f"{PGD}/{NAME}.min",

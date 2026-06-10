@@ -23,7 +23,7 @@ fi
 
 echo ""
 echo "  KEY OUTPUTS:"
-for f in "${NAME}.full.gbz" "${NAME}.full.hal" "${NAME}.d2.vcf.gz"; do
+for f in "${NAME}.full.gbz" "${NAME}.full.hal" "${NAME}.vcf.gz"; do
   [[ -f "$RES/$f" ]] && echo "  ✅ $f" || echo "  ❌ $f"
 done
 
