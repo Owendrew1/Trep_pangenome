@@ -1,10 +1,7 @@
-# Indexed FASTAs from index_Trep_refs (read-only).
-refs_dir: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results"
-index_done_flag: "/home/uottawa.o.univ/odrew060/github-repos/index_Trep_refs/results/UTM_Trep_v1.0/haploid/ref.done"
-refs_use_haplotype_subdir: true
-# New index layout: refs_dir: "/scratch/references/trifolium/repens"
-#   index_done_flag: "/scratch/references/trifolium/repens/Trep_ref_indexing.done"
-#   refs_use_haplotype_subdir: false
+# Indexed FASTAs from index_Trep_refs on scratch (read-only).
+refs_dir: "/scratch/references/trifolium/repens"
+index_done_flag: "/scratch/references/trifolium/repens/Trep_ref_indexing.done"
+refs_use_haplotype_subdir: false
 
 pangenome_samples_csv: "../resources/pangenome_genomes.csv"
 
